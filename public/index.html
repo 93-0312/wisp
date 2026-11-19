@@ -7,6 +7,20 @@
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
+  <!-- 몰래 모드 토글: 어느 화면에서든 우상단 -->
+  <button id="stealthBtn" class="stealth-btn" type="button" title="몰래 모드 (Alt+S)">◐</button>
+
+  <!-- 긴급 가림막: Esc 두 번 → 평범한 빈 메모 화면 -->
+  <div id="cover" class="cover hidden" aria-hidden="true">
+    <div class="cover-page">
+      <div class="cover-title">메모</div>
+      <div class="cover-line w80"></div>
+      <div class="cover-line w60"></div>
+      <div class="cover-line w90"></div>
+      <div class="cover-line w40"></div>
+    </div>
+  </div>
+
   <!-- 입장 화면 -->
   <section id="lobby" class="lobby">
     <h1 class="logo">WISP</h1>
@@ -19,6 +33,7 @@
     <button id="enterBtn" class="primary" type="button">들어가기</button>
     <p id="lobbyError" class="error"></p>
     <p class="fineprint">대화는 저장되지 않고, 새로고침하면 아무것도 남지 않아요.</p>
+    <p class="fineprint">◐ 몰래 모드 (Alt+S) · Esc 두 번 = 가림막</p>
   </section>
 
   <!-- 채팅 공간 -->
@@ -26,6 +41,7 @@
     <header class="topbar">
       <span class="logo small">WISP</span>
       <span id="count" class="count"></span>
+      <span class="topbar-spacer"></span>
     </header>
     <div id="room" class="room">
       <div class="hint">클릭하거나 방향키(WASD)로 이동</div>

@@ -210,3 +210,92 @@ button {
   outline: none;
 }
 .chat input:focus { border-color: var(--accent); }
+
+/* ---------- 몰래 모드 토글 ---------- */
+.stealth-btn {
+  position: fixed;
+  top: 8px;
+  right: 12px;
+  z-index: 50;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--muted);
+  border: 1px solid #3a3a63;
+  font-size: 16px;
+  line-height: 1;
+}
+.topbar-spacer { width: 36px; }
+.topbar { gap: 12px; }
+.count { margin-left: auto; }
+
+/* ---------- 몰래 모드: 뒤에서 슥 봤을 때 거의 안 보이게 ----------
+   채도 0, 대비 최소, 반짝임/움직임 제거. 화면 앞에 앉은 사람만 겨우 읽힐 정도. */
+body.stealth {
+  --bg: #121212;
+  --bg2: #141414;
+  --fg: #4a4a4a;
+  --muted: #333;
+  --accent: #262626;
+  --bubble: #1c1c1c;
+  --bubble-fg: #5a5a5a;
+  background: var(--bg);
+}
+body.stealth .logo {
+  background: none;
+  color: #2a2a2a;
+  animation: none;
+  filter: none;
+}
+body.stealth .room {
+  background: var(--bg2);
+  border-color: #1b1b1b;
+}
+body.stealth .avatar {
+  background: #1e1e1e !important;
+  box-shadow: none;
+  filter: grayscale(1) brightness(0.55);
+  opacity: 0.6;
+  animation: none;
+}
+body.stealth .player.me .avatar { outline-color: #2c2c2c; }
+body.stealth .player.walking .avatar { animation: none; }
+body.stealth .nametag { background: transparent; color: #363636; }
+body.stealth .bubble { animation: none; font-size: 13px; }
+body.stealth .bubble.scatter { background: transparent; }
+body.stealth .primary { background: #222; color: #555; }
+body.stealth .ghost,
+body.stealth .stealth-btn { border-color: #222; color: #333; }
+body.stealth .chat input {
+  background: #161616;
+  border-color: #1f1f1f;
+  color: #5a5a5a;
+}
+body.stealth .chat input::placeholder { color: #2c2c2c; }
+body.stealth .chat input:focus { border-color: #2a2a2a; }
+body.stealth .hint { display: none; }
+body.stealth .error { color: #5a3a3a; }
+
+/* ---------- 긴급 가림막 ---------- */
+.cover {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  background: #fafafa;
+  display: flex;
+  justify-content: center;
+  padding: 48px 16px;
+  cursor: default;
+}
+.cover-page { width: min(680px, 100%); }
+.cover-title { font-size: 22px; font-weight: 600; color: #333; margin-bottom: 24px; }
+.cover-line { height: 10px; border-radius: 4px; background: #ececec; margin: 14px 0; }
+.cover-line.w80 { width: 80%; }
+.cover-line.w60 { width: 60%; }
+.cover-line.w90 { width: 90%; }
+.cover-line.w40 { width: 40%; }
+body.stealth .cover { background: #121212; }
+body.stealth .cover-title { color: #555; }
+body.stealth .cover-line { background: #1c1c1c; }

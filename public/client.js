@@ -15,6 +15,57 @@
   let ROOM = { w: 1000, h: 600 };
   const els = new Map(); // id -> { root, bubbleTimer }
 
+  // ---------- 몰래 모드 ----------
+  const store = {
+    get: (k) => { try { return localStorage.getItem(k); } catch { return null; } },
+    set: (k, v) => { try { localStorage.setItem(k, v); } catch {} },
+  };
+  const REAL_TITLE = "WISP";
+  const QUIET_TITLE = "메모";
+
+  function setStealth(on) {
+    document.body.classList.toggle("stealth", on);
+    document.title = on ? QUIET_TITLE : REAL_TITLE;
+    store.set("wisp:stealth", on ? "1" : "0");
+  }
+  setStealth(store.get("wisp:stealth") === "1");
+  $("stealthBtn").onclick = () => setStealth(!document.body.classList.contains("stealth"));
+
+  // 긴급 가림막: Esc 두 번 빠르게 → 덮기 / 가림막 상태에서 클릭이나 아무 키 → 복귀
+  const cover = $("cover");
+  let lastEsc = 0;
+  let coverShownAt = 0;
+  function showCover() {
+    cover.classList.remove("hidden");
+    document.title = QUIET_TITLE;
+    document.activeElement?.blur();
+    coverShownAt = Date.now();
+  }
+  function hideCover() {
+    cover.classList.add("hidden");
+    document.title = document.body.classList.contains("stealth") ? QUIET_TITLE : REAL_TITLE;
+    if (me) input.focus();
+  }
+  window.addEventListener("keydown", (ev) => {
+    if (!cover.classList.contains("hidden")) {
+      if (Date.now() - coverShownAt > 300) hideCover();
+      ev.preventDefault();
+      ev.stopImmediatePropagation();
+      return;
+    }
+    if (ev.altKey && (ev.key === "s" || ev.key === "S" || ev.code === "KeyS")) {
+      ev.preventDefault();
+      setStealth(!document.body.classList.contains("stealth"));
+      return;
+    }
+    if (ev.key === "Escape") {
+      const now = Date.now();
+      if (now - lastEsc < 500) showCover();
+      lastEsc = now;
+    }
+  }, true);
+  cover.addEventListener("click", hideCover);
+
   // ---------- Lobby ----------
   async function reroll() {
     character = await fetch("/character").then((r) => r.json());
