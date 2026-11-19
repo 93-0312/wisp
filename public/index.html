@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>WISP</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <!-- 입장 화면 -->
+  <section id="lobby" class="lobby">
+    <h1 class="logo">WISP</h1>
+    <p class="tagline">말은 연기처럼, 흔적 없이.</p>
+    <div class="preview">
+      <div id="previewAvatar" class="avatar big"></div>
+      <div id="previewName" class="preview-name"></div>
+      <button id="rerollBtn" class="ghost" type="button">🎲 다른 모습</button>
+    </div>
+    <button id="enterBtn" class="primary" type="button">들어가기</button>
+    <p id="lobbyError" class="error"></p>
+    <p class="fineprint">대화는 저장되지 않고, 새로고침하면 아무것도 남지 않아요.</p>
+  </section>
+
+  <!-- 채팅 공간 -->
+  <main id="app" class="app hidden">
+    <header class="topbar">
+      <span class="logo small">WISP</span>
+      <span id="count" class="count"></span>
+    </header>
+    <div id="room" class="room">
+      <div class="hint">클릭하거나 방향키(WASD)로 이동</div>
+    </div>
+    <form id="chatForm" class="chat">
+      <input id="chatInput" maxlength="200" autocomplete="off" placeholder="속삭이기… (Enter)" />
+      <button class="primary" type="submit">보내기</button>
+    </form>
+  </main>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="client.js"></script>
+</body>
+</html>
