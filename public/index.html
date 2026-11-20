@@ -44,7 +44,25 @@
       <span class="topbar-spacer"></span>
     </header>
     <div id="room" class="room">
-      <div id="hint" class="hint">클릭하거나 방향키(WASD)로 이동</div>
+      <!-- 뒷벽: 술병 선반 + 네온 -->
+      <div class="wall">
+        <div class="neon">WISP BAR</div>
+        <div class="shelf s1"><span>🍾</span><span>🍷</span><span>🥃</span><span>🍶</span><span>🍸</span><span>🍾</span><span>🥂</span><span>🍶</span><span>🍷</span></div>
+        <div class="shelf s2"><span>🍺</span><span>🍶</span><span>🍾</span><span>🥃</span><span>🍷</span><span>🍺</span><span>🍶</span><span>🍾</span></div>
+      </div>
+      <div class="floor"></div>
+      <div id="hint" class="hint">클릭하거나 방향키(WASD)로 이동 · 의자 근처에서 멈추면 앉아요</div>
+      <!-- 메뉴판 -->
+      <div id="drinkMenu" class="menu hidden">
+        <div class="menu-title"></div>
+        <div class="menu-items">
+          <button type="button" tabindex="-1" data-drink="beer">🍺<span>맥주</span><small>1</small></button>
+          <button type="button" tabindex="-1" data-drink="soju">🍶<span>소주</span><small>2</small></button>
+          <button type="button" tabindex="-1" data-drink="wine">🍷<span>와인</span><small>3</small></button>
+          <button type="button" tabindex="-1" data-drink="cocktail">🍸<span>칵테일</span><small>4</small></button>
+          <button type="button" tabindex="-1" data-drink="whisky">🥃<span>위스키</span><small>5</small></button>
+        </div>
+      </div>
     </div>
     <div id="actions" class="actions">
       <button type="button" tabindex="-1" data-hold="puff" title="길게 눌렀다 떼면 후~ (Space)">💨<small>Space</small></button>
@@ -54,6 +72,11 @@
       <button type="button" tabindex="-1" data-act="coffee" title="커피 홀짝 (4)">☕<small>4</small></button>
       <button type="button" tabindex="-1" data-act="poke" title="쿡 찌르기 (5)">👉<small>5</small></button>
       <button type="button" tabindex="-1" data-act="hide" title="소품으로 변신 (6)">🪴<small>6</small></button>
+      <span class="actions-sep"></span>
+      <button type="button" tabindex="-1" data-act="order" title="바에서 주문 (7)">🍸<small>7</small></button>
+      <button type="button" tabindex="-1" data-act="sip" title="홀짝 (8)">🍶<small>8</small></button>
+      <button type="button" tabindex="-1" data-act="cheers" title="건배 (9)">🥂<small>9</small></button>
+      <button type="button" tabindex="-1" data-act="treat" title="한 잔 쏘기 (0)">🎁<small>0</small></button>
     </div>
     <form id="chatForm" class="chat">
       <input id="chatInput" maxlength="200" autocomplete="off" placeholder="속삭이기… (Enter)" />

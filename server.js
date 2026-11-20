@@ -22,8 +22,24 @@ const ADJECTIVES = [
   "졸린", "수상한", "조용한", "떠도는", "배고픈", "몽롱한",
   "투명한", "느긋한", "엉뚱한", "반짝이는", "익명의", "길 잃은",
 ];
-const PROPS = ["🪴", "🪑", "📦", "🛋️", "🧺", "🗿", "🌵"];
-const ACTS = new Set(["puff", "sigh", "bubbles", "pop", "coffee", "poke", "plane", "hide", "sleep"]);
+const PROPS = ["🪑", "🛢️", "🪴", "📦", "🍾", "🗿", "🧺"];
+const ACTS = new Set([
+  "puff", "sigh", "bubbles", "pop", "coffee", "poke", "plane", "hide", "sleep",
+  "order", "sip", "cheers", "treat",
+]);
+// 술 종류 → 한 모금당 취기
+const DRINKS = { beer: 0.1, soju: 0.18, wine: 0.13, cocktail: 0.13, whisky: 0.22 };
+const SIPS_PER_GLASS = 4;
+const SOBER_PER_SEC = 1 / 300; // 취기 1.0이 5분에 걸쳐 깬다
+const MIN_Y = 140;             // 바 카운터 앞까지만 걸어갈 수 있다
+const CHEERS_RANGE = 170;
+
+function soberUp(p) {
+  const now = Date.now();
+  p.tipsy = Math.max(0, p.tipsy - ((now - p.tipsyAt) / 1000) * SOBER_PER_SEC);
+  p.tipsyAt = now;
+  return p.tipsy;
+}
 const COLORS = ["#ff8fab", "#ffd166", "#06d6a0", "#4cc9f0", "#b388ff", "#ff9e6d", "#90e0ef", "#c5f277"];
 
 const pick = (arr) => arr[Math.floor(Math.random() * arr.length)];
@@ -64,9 +80,13 @@ io.on("connection", (socket) => {
       y: Math.round(ROOM_H * (0.3 + Math.random() * 0.4)),
       hidden: null, // 변신 중인 소품 이모지
       sleep: false,
+      drink: null,  // { kind, left }
+      tipsy: 0,
+      tipsyAt: Date.now(),
     };
     players.set(socket.id, player);
-    ack?.({ ok: true, me: player, players: [...players.values()], room: { w: ROOM_W, h: ROOM_H } });
+    players.forEach(soberUp);
+    ack?.({ ok: true, me: player, players: [...players.values()], room: { w: ROOM_W, h: ROOM_H, minY: MIN_Y } });
     socket.broadcast.emit("player:join", player);
     io.emit("count", players.size);
   });
@@ -75,7 +95,7 @@ io.on("connection", (socket) => {
     const p = players.get(socket.id);
     if (!p || !pos) return;
     p.x = clamp(Number(pos.x) || 0, 0, ROOM_W);
-    p.y = clamp(Number(pos.y) || 0, 0, ROOM_H);
+    p.y = clamp(Number(pos.y) || 0, MIN_Y, ROOM_H);
     socket.broadcast.emit("player:move", { id: p.id, x: p.x, y: p.y });
   });
 
@@ -142,6 +162,33 @@ io.on("connection", (socket) => {
         p.sleep = !!a.on;
         out.on = p.sleep;
         break;
+      case "order":
+        if (!DRINKS[a.drink]) return;
+        p.drink = { kind: a.drink, left: SIPS_PER_GLASS };
+        out.drink = p.drink;
+        break;
+      case "sip":
+        if (!p.drink || p.drink.left <= 0) return;
+        p.drink.left -= 1;
+        soberUp(p);
+        p.tipsy = Math.min(1, p.tipsy + DRINKS[p.drink.kind]);
+        out.drink = p.drink;
+        out.tipsy = p.tipsy;
+        break;
+      case "cheers":
+        if (!p.drink) return;
+        out.targets = [...players.values()]
+          .filter((q) => q.id !== p.id && q.drink && Math.hypot(q.x - p.x, q.y - p.y) < CHEERS_RANGE)
+          .map((q) => q.id);
+        break;
+      case "treat": {
+        const q = players.get(a.target);
+        if (!q || q.id === p.id || !DRINKS[a.drink]) return;
+        q.drink = { kind: a.drink, left: SIPS_PER_GLASS };
+        out.target = q.id;
+        out.drink = q.drink;
+        break;
+      }
     }
     io.emit("player:act", out);
   });
