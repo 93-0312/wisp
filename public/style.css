@@ -305,10 +305,12 @@ body.stealth .hint { display: none; }
 body.stealth .error { color: #5a3a3a; }
 
 /* ---------- 긴급 가림막 ---------- */
+/* 가림막 중엔 뒤 화면 자체를 숨긴다 (z-index 경쟁에 기대지 않음) */
+body.covered #app, body.covered #lobby, body.covered #stealthBtn { visibility: hidden !important; }
 .cover {
   position: fixed;
   inset: 0;
-  z-index: 100;
+  z-index: 2147483647;
   background: #fafafa;
   display: flex;
   justify-content: center;

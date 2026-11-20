@@ -105,12 +105,14 @@
   let coverShownAt = 0;
   function showCover() {
     cover.classList.remove("hidden");
+    document.body.classList.add("covered");
     document.title = QUIET_TITLE;
     document.activeElement?.blur();
     coverShownAt = Date.now();
   }
   function hideCover() {
     cover.classList.add("hidden");
+    document.body.classList.remove("covered");
     document.title = document.body.classList.contains("stealth") ? QUIET_TITLE : REAL_TITLE;
     if (me) input.focus();
   }
