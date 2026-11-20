@@ -44,7 +44,16 @@
       <span class="topbar-spacer"></span>
     </header>
     <div id="room" class="room">
-      <div class="hint">클릭하거나 방향키(WASD)로 이동</div>
+      <div id="hint" class="hint">클릭하거나 방향키(WASD)로 이동</div>
+    </div>
+    <div id="actions" class="actions">
+      <button type="button" tabindex="-1" data-hold="puff" title="길게 눌렀다 떼면 후~ (Space)">💨<small>Space</small></button>
+      <button type="button" tabindex="-1" data-act="sigh" title="한숨 (1)">😮‍💨<small>1</small></button>
+      <button type="button" tabindex="-1" data-act="bubbles" title="비눗방울 (2)">🫧<small>2</small></button>
+      <button type="button" tabindex="-1" data-act="plane" title="종이비행기 귓속말 (3)">✈️<small>3</small></button>
+      <button type="button" tabindex="-1" data-act="coffee" title="커피 홀짝 (4)">☕<small>4</small></button>
+      <button type="button" tabindex="-1" data-act="poke" title="쿡 찌르기 (5)">👉<small>5</small></button>
+      <button type="button" tabindex="-1" data-act="hide" title="소품으로 변신 (6)">🪴<small>6</small></button>
     </div>
     <form id="chatForm" class="chat">
       <input id="chatInput" maxlength="200" autocomplete="off" placeholder="속삭이기… (Enter)" />

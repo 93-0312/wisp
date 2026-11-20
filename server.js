@@ -22,6 +22,8 @@ const ADJECTIVES = [
   "졸린", "수상한", "조용한", "떠도는", "배고픈", "몽롱한",
   "투명한", "느긋한", "엉뚱한", "반짝이는", "익명의", "길 잃은",
 ];
+const PROPS = ["🪴", "🪑", "📦", "🛋️", "🧺", "🗿", "🌵"];
+const ACTS = new Set(["puff", "sigh", "bubbles", "pop", "coffee", "poke", "plane", "hide", "sleep"]);
 const COLORS = ["#ff8fab", "#ffd166", "#06d6a0", "#4cc9f0", "#b388ff", "#ff9e6d", "#90e0ef", "#c5f277"];
 
 const pick = (arr) => arr[Math.floor(Math.random() * arr.length)];
@@ -60,6 +62,8 @@ io.on("connection", (socket) => {
       color: valid && COLORS.includes(character.color) ? character.color : base.color,
       x: Math.round(ROOM_W * (0.2 + Math.random() * 0.6)),
       y: Math.round(ROOM_H * (0.3 + Math.random() * 0.4)),
+      hidden: null, // 변신 중인 소품 이모지
+      sleep: false,
     };
     players.set(socket.id, player);
     ack?.({ ok: true, me: player, players: [...players.values()], room: { w: ROOM_W, h: ROOM_H } });
@@ -85,6 +89,61 @@ io.on("connection", (socket) => {
     if (!msg) return;
     // 전달만 하고 끝. 저장/로그 없음.
     io.emit("player:say", { id: p.id, text: msg });
+  });
+
+  // 캐릭터 액션: 연기, 한숨, 비눗방울, 종이비행기, 커피, 쿡 찌르기, 변신, 졸기
+  let lastActAt = 0;
+  socket.on("act", (a) => {
+    const p = players.get(socket.id);
+    if (!p || !a || !ACTS.has(a.type)) return;
+    if (a.type !== "pop" && a.type !== "sleep") {
+      const now = Date.now();
+      if (now - lastActAt < 250) return;
+      lastActAt = now;
+    }
+    const out = { id: p.id, type: a.type };
+    const text = typeof a.text === "string" ? a.text.trim().slice(0, MAX_MSG_LEN) : "";
+
+    switch (a.type) {
+      case "puff":
+        out.power = clamp(Number(a.power) || 0, 0, 1);
+        if (text) out.text = text;
+        break;
+      case "bubbles":
+        out.list = (Array.isArray(a.list) ? a.list : []).slice(0, 8).map((b) => ({
+          bid: String(b?.bid).slice(0, 60),
+          dx: clamp(Number(b?.dx) || 0, -220, 220),
+          rise: clamp(Number(b?.rise) || 0, 40, 500),
+          size: clamp(Number(b?.size) || 20, 10, 60),
+          dur: clamp(Number(b?.dur) || 6000, 2000, 12000),
+        }));
+        break;
+      case "pop":
+        out.bid = String(a.bid).slice(0, 60);
+        break;
+      case "poke":
+        if (!players.has(a.target) || a.target === p.id) return;
+        out.target = a.target;
+        break;
+      case "plane": {
+        if (!players.has(a.target) || a.target === p.id) return;
+        out.target = a.target;
+        // 비행기는 모두에게 보이지만, 귓속말 내용은 받는 사람에게만
+        socket.broadcast.except(a.target).emit("player:act", out);
+        if (a.target !== socket.id) io.to(a.target).emit("player:act", { ...out, text, fromName: p.name });
+        socket.emit("player:act", out);
+        return;
+      }
+      case "hide":
+        p.hidden = a.on ? pick(PROPS) : null;
+        out.prop = p.hidden;
+        break;
+      case "sleep":
+        p.sleep = !!a.on;
+        out.on = p.sleep;
+        break;
+    }
+    io.emit("player:act", out);
   });
 
   socket.on("disconnect", () => {

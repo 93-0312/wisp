@@ -299,3 +299,192 @@ body.stealth .error { color: #5a3a3a; }
 body.stealth .cover { background: #121212; }
 body.stealth .cover-title { color: #555; }
 body.stealth .cover-line { background: #1c1c1c; }
+
+/* =========================================================
+   캐릭터 액션
+   ========================================================= */
+:root { --smoke: rgba(236, 235, 255, 0.85); --soap: rgba(190, 230, 255, 0.9); }
+body.stealth { --smoke: #3a3a3a; --soap: #333; }
+
+.face { display: inline-block; transition: transform 200ms ease; }
+
+/* 액션 버튼 바 */
+.actions {
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  padding: 10px 16px 0;
+  flex-wrap: wrap;
+}
+.actions button {
+  position: relative;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border-radius: 12px;
+  background: #1c1d38;
+  border: 1px solid #2c2d52;
+  font-size: 20px;
+  line-height: 1;
+  user-select: none;
+  touch-action: none;
+}
+.actions button:hover { background: #26284a; }
+.actions button:active { transform: scale(0.92); }
+.actions small {
+  position: absolute;
+  right: 3px;
+  bottom: 2px;
+  font-size: 9px;
+  color: var(--muted);
+}
+body.stealth .actions button { background: #151515; border-color: #1c1c1c; filter: grayscale(1) brightness(0.45); }
+
+/* 귓속말 입력 모드 */
+.chat input.whisper { border-color: #4cc9f0; }
+body.stealth .chat input.whisper { border-color: #2e2e2e; }
+.room.aiming { cursor: cell; }
+.hint.active { opacity: 1; color: var(--fg); font-size: 13px; }
+body.stealth .hint.active { display: block; color: #444; }
+
+/* 공통 이펙트 */
+.fx {
+  position: absolute;
+  pointer-events: none;
+  transform: translate(-50%, -50%);
+  z-index: 3;
+  will-change: transform, opacity;
+}
+.fx-attached {
+  position: absolute;
+  left: 50%;
+  top: 24px;
+  pointer-events: none;
+  z-index: 3;
+}
+body.stealth .fx,
+body.stealth .fx-attached,
+body.stealth .zzz { filter: grayscale(1) brightness(0.5); }
+
+/* 💨 연기 */
+.fx.ring {
+  border-radius: 50%;
+  border: 3px solid var(--smoke);
+  box-shadow: 0 0 8px var(--smoke), inset 0 0 6px var(--smoke);
+  filter: blur(0.6px);
+}
+.fx.haze {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: radial-gradient(circle, var(--smoke), transparent 70%);
+  filter: blur(3px);
+}
+.fx.smoke-ch {
+  color: var(--smoke);
+  font-size: 15px;
+  font-weight: 600;
+  white-space: pre;
+  text-shadow: 0 0 6px var(--smoke);
+}
+body.stealth .fx.smoke-ch { color: #555; text-shadow: none; }
+
+/* 😮‍💨 한숨 / 변신 연기 */
+.fx.cloud {
+  width: 18px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--smoke);
+  box-shadow: 7px -3px 0 1px var(--smoke), -6px -2px 0 0 var(--smoke);
+  filter: blur(1px);
+}
+
+/* 🫧 비눗방울 */
+.fx.soap { pointer-events: auto; cursor: pointer; z-index: 4; }
+.soap-in {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  border: 1.5px solid var(--soap);
+  background:
+    radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.9) 0 8%, transparent 9%),
+    radial-gradient(circle at 50% 50%, transparent 55%, rgba(179, 136, 255, 0.35) 75%, rgba(76, 201, 240, 0.4));
+}
+body.stealth .soap-in { background: none; }
+
+/* ☕ 커피 */
+.fx-attached.cup {
+  width: 24px;
+  height: 24px;
+  margin: -12px 0 0 -12px;
+  font-size: 18px;
+  line-height: 24px;
+  text-align: center;
+}
+.fx-attached.steam {
+  width: 6px;
+  height: 14px;
+  margin: -7px 0 0 -3px;
+  border-radius: 50%;
+  background: var(--smoke);
+  filter: blur(2px);
+}
+
+/* 👉 / ✉ 표시 */
+.fx.mark {
+  font-size: 18px;
+  font-weight: 800;
+  color: #ffd166;
+  text-shadow: 0 0 6px rgba(0, 0, 0, 0.5);
+}
+.fx.plane { font-size: 22px; z-index: 5; }
+
+/* ✉ 귓속말 쪽지 */
+.bubble.note { background: #dff6ff; border: 1px dashed #4cc9f0; }
+.bubble.note::after { border-top-color: #dff6ff; }
+.note-title { font-size: 11px; color: #3a7ca5; margin-bottom: 2px; transition: opacity 1s; }
+.bubble.scatter .note-title { opacity: 0; }
+.bubble.note.scatter { border-color: transparent; }
+body.stealth .bubble.note { background: #1a1d1f; border-color: #262a2c; }
+body.stealth .bubble.note::after { border-top-color: #1a1d1f; }
+body.stealth .note-title { color: #3c4448; }
+
+/* 🪴 변신 */
+.player.disguised .avatar {
+  background: transparent;
+  box-shadow: none;
+  animation: none;
+  font-size: 34px;
+}
+.player.disguised.me .avatar { outline: 1px dashed rgba(255, 255, 255, 0.35); }
+.player.disguised:not(.me) .nametag { visibility: hidden; }
+.player.disguised.me .nametag::after { content: " · 숨는 중"; opacity: 0.6; }
+body.stealth .player.disguised .avatar { background: transparent !important; }
+
+/* 💤 졸기 */
+.player.sleeping .avatar { animation: doze 3s ease-in-out infinite; }
+@keyframes doze {
+  0%, 100% { transform: rotate(-6deg) translateY(0); }
+  50% { transform: rotate(-12deg) translateY(2px); }
+}
+.zzz {
+  position: absolute;
+  left: 60%;
+  top: -6px;
+  pointer-events: none;
+}
+.zzz span {
+  position: absolute;
+  color: var(--fg);
+  font-weight: 700;
+  opacity: 0;
+  animation: zfloat 2.4s ease-out infinite;
+}
+.zzz span:nth-child(1) { font-size: 10px; }
+.zzz span:nth-child(2) { font-size: 13px; animation-delay: 0.8s; }
+.zzz span:nth-child(3) { font-size: 16px; animation-delay: 1.6s; }
+@keyframes zfloat {
+  0% { transform: translate(0, 0); opacity: 0; }
+  20% { opacity: 0.9; }
+  100% { transform: translate(18px, -30px); opacity: 0; }
+}
