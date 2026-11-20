@@ -16,16 +16,24 @@
   };
   const DRINK_KEYS = Object.keys(DRINKS);
 
-  // ---------- 술집 배치 (논리 좌표 1000 x 600, y가 클수록 앞쪽) ----------
+  // ---------- 배치 (논리 좌표 1000 x 600, y가 클수록 앞쪽) ----------
+  // 광장: 뒤쪽 가운데 문 → 술집 / 술집: 왼쪽 앞 출구 매트 → 광장
+  const PLAZA_DOOR = { x: 500, halfW: 55 };
+  const BAR_EXIT = { x: 70, y: 560, r: 48 };
   const COUNTER = { x1: 110, x2: 890, y: 105, depth: 40 };
   const STOOLS = [200, 340, 480, 620, 760].map((x) => ({ x, y: 150 }));
-  const TABLES = [{ x: 270, y: 380 }, { x: 730, y: 400 }];
+  const TABLES = [{ x: 330, y: 380 }, { x: 730, y: 400 }];
   const CHAIRS = TABLES.flatMap((t) => [
     { x: t.x - 100, y: t.y - 12 },
     { x: t.x + 100, y: t.y - 12 },
     { x: t.x, y: t.y + 80 },
   ]);
-  const SEATS = [...STOOLS, ...CHAIRS];
+  const SCENE_HINT = {
+    plaza: "클릭이나 방향키로 이동 · 뒤쪽 문으로 들어가면 술집",
+    bar: "의자 근처에서 멈추면 앉아요 · 왼쪽 아래 출구로 나가면 광장",
+  };
+  let SEATS = [];
+  let scene = "plaza";
 
   // ---------- 원근 투영: 뒤쪽은 좁고 작게, 앞쪽은 넓고 크게 ----------
   const PROJ = { back: 0.34, front: 0.97, backHalf: 0.33, frontHalf: 0.5, sBack: 0.62, sFront: 1.1 };
@@ -150,14 +158,9 @@
         $("enterBtn").disabled = false;
         return;
       }
-      ROOM = { minY: 140, ...res.room };
       lobby.classList.add("hidden");
       app.classList.remove("hidden");
-      buildScene();
-      me = { id: res.me.id };
-      res.players.forEach(addPlayer);
-      me = els.get(res.me.id).data;
-      me.tx = me.ty = null;
+      enterScene(res);
       input.placeholder = DEFAULT_PH;
       input.focus();
       bindSocket();
@@ -166,9 +169,10 @@
     });
   };
 
-  // ---------- 술집 무대 ----------
-  const furniture = []; // { el, x, y, kind }
+  // ---------- 무대 (광장 / 술집) ----------
+  let furniture = []; // { el, x, y, kind }
   let bartender = null;
+  let doorArmed = false; // 도착 직후 문 위에 서 있어도 바로 다시 나가지 않게
 
   function addFurn(kind, x, y, html) {
     const el = div("furn " + kind);
@@ -179,20 +183,68 @@
     return f;
   }
 
-  function buildScene() {
-    addFurn("counter", COUNTER.x1, COUNTER.y,
-      `<div class="counter-top"></div><div class="counter-front"></div>
-       <div class="counter-items"><span>🍺</span><span>🍋</span><span>🥜</span><span>🍸</span><span>🧊</span></div>`);
-    bartender = addFurn("bartender", 500, 70, `<div class="bt-body">🤵</div>`);
-    STOOLS.forEach((s) => addFurn("stool", s.x, s.y, `<div class="seat"></div><div class="leg"></div>`));
-    CHAIRS.forEach((s) => addFurn("stool chair", s.x, s.y, `<div class="seat"></div><div class="leg"></div>`));
-    TABLES.forEach((t) => {
-      addFurn("table", t.x, t.y, `<div class="t-top"><span>🕯️</span></div><div class="t-leg"></div><div class="t-base"></div>`);
-      addFurn("glow", t.x, t.y);
-      addFurn("lamp", t.x, t.y, `<div class="cord"></div><div class="shade"></div>`);
-    });
-    addFurn("glow wide", 500, 150);
+  function buildScene(id) {
+    furniture.forEach((f) => f.el.remove());
+    furniture = [];
+    bartender = null;
+    scene = id;
+    room.dataset.scene = id;
+    $("sign").textContent = id === "bar" ? "BAR" : "";
+    if (id === "plaza") {
+      SEATS = [];
+      addFurn("door", PLAZA_DOOR.x, 0, `<div class="door-frame"><span>BAR</span></div>`);
+      addFurn("mat", PLAZA_DOOR.x, ROOM.minY + 4);
+    } else {
+      SEATS = [...STOOLS, ...CHAIRS];
+      addFurn("counter", COUNTER.x1, COUNTER.y, `<div class="counter-top"></div><div class="counter-front"></div>`);
+      bartender = addFurn("bartender", 500, 70, `<div class="bt-body">🤵</div>`);
+      STOOLS.forEach((s) => addFurn("stool", s.x, s.y, `<div class="seat"></div><div class="leg"></div>`));
+      CHAIRS.forEach((s) => addFurn("stool chair", s.x, s.y, `<div class="seat"></div><div class="leg"></div>`));
+      TABLES.forEach((t) => addFurn("table", t.x, t.y, `<div class="t-top"></div><div class="t-leg"></div>`));
+      addFurn("mat exit", BAR_EXIT.x, BAR_EXIT.y, `<span>나가기</span>`);
+    }
+    setHint(null);
     layout();
+  }
+
+  // 서버 응답(입장 / 문 통과)으로 공간을 새로 그린다
+  function enterScene(res) {
+    els.forEach((e) => e.root.remove());
+    els.clear();
+    soaps.clear();
+    room.querySelectorAll(".fx").forEach((el) => el.remove());
+    ROOM = { minY: 140, ...res.room };
+    buildScene(ROOM.id);
+    me = { id: res.me.id };
+    res.players.forEach(addPlayer);
+    me = els.get(res.me.id).data;
+    me.tx = me.ty = null;
+    doorArmed = false;
+  }
+
+  let switching = false;
+  function goTo(id) {
+    if (switching || !socket) return;
+    switching = true;
+    closeMenu();
+    endAim();
+    clearWhisper();
+    pendingMenu = false;
+    keys.clear();
+    const fade = $("fade");
+    fade.classList.add("on");
+    setTimeout(() => {
+      socket.emit("go", id, (res) => {
+        enterScene(res);
+        fade.classList.remove("on");
+        switching = false;
+      });
+    }, 250);
+  }
+
+  function atDoor() {
+    if (scene === "plaza") return me.y <= ROOM.minY + 12 && Math.abs(me.x - PLAZA_DOOR.x) < PLAZA_DOOR.halfW;
+    return Math.hypot(me.x - BAR_EXIT.x, me.y - BAR_EXIT.y) < BAR_EXIT.r;
   }
 
   function layout() {
@@ -219,8 +271,8 @@
       st.setProperty("--inL", c.x - a.x + "px");
       st.setProperty("--inR", b.x - d.x + "px");
     }
-    if (f.kind.startsWith("glow")) st.zIndex = 50;
-    if (f.kind === "lamp") st.zIndex = 101 + Math.round(f.y); // 테이블 바로 위
+    if (f.kind.startsWith("mat")) st.zIndex = 50; // 바닥에 깔림
+    if (f.kind === "door") st.zIndex = 2;
 
   }
 
@@ -832,7 +884,8 @@
         socket.emit("act", { type: "hide", on: !mine.hidden });
         break;
       case "order":
-        if (me.y <= ROOM.minY + 40) openMenu("order");
+        if (scene !== "bar") setHint("🍸 주문은 술집에서! 뒤쪽 문으로 들어가요", 2000);
+        else if (me.y <= ROOM.minY + 40) openMenu("order");
         else {
           // 바까지 걸어가서 주문
           me.tx = clamp(me.x, COUNTER.x1 + 40, COUNTER.x2 - 40);
@@ -858,11 +911,10 @@
   }
 
   // 힌트 문구
-  const DEFAULT_HINT = hint.textContent;
   let hintTimer = null;
   function setHint(text, ms) {
     clearTimeout(hintTimer);
-    hint.textContent = text || DEFAULT_HINT;
+    hint.textContent = text || SCENE_HINT[scene];
     hint.classList.toggle("active", !!text);
     if (text && ms) hintTimer = setTimeout(() => setHint(null), ms);
   }
@@ -969,7 +1021,7 @@
         case "treat": if (t) doTreat(e, t, a.drink); break;
       }
     });
-    socket.on("count", (n) => ($("count").textContent = `지금 ${n}명이 한잔하는 중`));
+    socket.on("count", (c) => ($("count").textContent = `광장 ${c.plaza} · 술집 ${c.bar}`));
     socket.on("disconnect", () => {
       $("count").textContent = "연결이 끊겼어요. 새로고침해 주세요.";
     });
@@ -1142,6 +1194,13 @@
       }
     }
     wasMoving = moving;
+
+    // 문 통과
+    if (!switching) {
+      const onDoor = atDoor();
+      if (!onDoor) doorArmed = true;
+      else if (doorArmed) goTo(scene === "plaza" ? "bar" : "plaza");
+    }
     requestAnimationFrame(loop);
   }
 

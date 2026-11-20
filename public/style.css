@@ -3,7 +3,7 @@
   --bg2: #1a1b33;
   --fg: #ecebff;
   --muted: #8d8bb3;
-  --accent: #b388ff;
+  --accent: #a99bd6;
   --bubble: #ffffff;
   --bubble-fg: #1a1b33;
 }
@@ -13,7 +13,7 @@
 html, body {
   margin: 0;
   height: 100%;
-  background: radial-gradient(ellipse at top, #24264a 0%, var(--bg) 70%);
+  background: #15161c;
   color: var(--fg);
   font-family: "Pretendard", "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif;
   overflow: hidden;
@@ -49,11 +49,7 @@ button {
   font-size: clamp(48px, 12vw, 96px);
   letter-spacing: 0.3em;
   font-weight: 800;
-  background: linear-gradient(120deg, #fff, var(--accent), #4cc9f0);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-  animation: breathe 5s ease-in-out infinite;
+  color: #d8d6e8;
 }
 .logo.small { font-size: 20px; letter-spacing: 0.25em; animation: none; }
 .tagline { margin: 0; color: var(--muted); }
@@ -522,11 +518,14 @@ body.stealth .player.disguised .avatar { background: transparent !important; }
 /* =========================================================
    2.5D 술집
    ========================================================= */
+/* 공통 톤: 차분하게. 광장은 회청색, 술집은 낮은 갈색 */
 .room {
-  background: #0d0806;
-  border-color: #2a1c14;
+  background: #1b1d24;
+  border-color: #2a2c36;
   cursor: pointer;
 }
+.room[data-scene="bar"] { background: #17120f; border-color: #2b231d; }
+
 /* 뒷벽 (방 높이의 34%) */
 .wall {
   position: absolute;
@@ -534,44 +533,38 @@ body.stealth .player.disguised .avatar { background: transparent !important; }
   right: 0;
   top: 0;
   height: 34.5%;
-  background:
-    repeating-linear-gradient(90deg, transparent 0 58px, rgba(0, 0, 0, 0.25) 58px 60px),
-    linear-gradient(#2b1a12, #1d120c 80%, #140c08);
+  background: #262935;
+  border-bottom: 2px solid #1d1f28;
   z-index: 1;
   overflow: hidden;
 }
-.neon {
+.room[data-scene="bar"] .wall { background: #2a211b; border-bottom-color: #1e1813; }
+.sign {
   position: absolute;
-  top: 8%;
+  top: 10%;
   left: 50%;
   transform: translateX(-50%);
-  font-weight: 800;
-  letter-spacing: 0.35em;
-  font-size: clamp(12px, 2.4vw, 22px);
-  color: #ffb3d1;
-  text-shadow: 0 0 6px #ff4f9a, 0 0 18px #ff4f9a, 0 0 32px #ff2f86;
-  animation: flicker 6s infinite;
+  font-size: 13px;
+  letter-spacing: 0.4em;
+  color: #8a7a6c;
   white-space: nowrap;
 }
-@keyframes flicker {
-  0%, 92%, 96%, 100% { opacity: 1; }
-  94% { opacity: 0.55; }
-}
-.shelf {
+.shelf { display: none; }
+.room[data-scene="bar"] .shelf {
+  display: block;
   position: absolute;
-  left: 22%;
-  right: 22%;
-  height: 22%;
-  display: flex;
-  justify-content: space-around;
-  align-items: flex-end;
-  border-bottom: 4px solid #4a2f20;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.5);
-  font-size: clamp(12px, 2vw, 18px);
+  left: 26%;
+  right: 26%;
+  height: 16%;
+  border-bottom: 3px solid #3d3027;
+  /* 병 실루엣: 단순한 막대들 */
+  background: repeating-linear-gradient(90deg, transparent 0 14px, #3a2e26 14px 22px, transparent 22px 34px);
+  background-size: 100% 70%;
+  background-position: bottom;
+  background-repeat: repeat-x;
 }
-.shelf.s1 { top: 30%; }
+.shelf.s1 { top: 34%; }
 .shelf.s2 { top: 62%; }
-.shelf span { filter: saturate(0.8) brightness(0.85); }
 
 /* 바닥: 투영과 같은 사다리꼴 */
 .floor {
@@ -579,10 +572,81 @@ body.stealth .player.disguised .avatar { background: transparent !important; }
   inset: 0;
   clip-path: polygon(17% 34%, 83% 34%, 100% 97%, 0 97%);
   background:
-    repeating-linear-gradient(0deg, transparent 0 22px, rgba(0, 0, 0, 0.22) 22px 24px),
-    linear-gradient(#3a2416, #4a2e1b 60%, #3b2415);
+    repeating-linear-gradient(0deg, transparent 0 30px, rgba(0, 0, 0, 0.12) 30px 31px),
+    #30333f;
   z-index: 0;
 }
+.room[data-scene="bar"] .floor {
+  background:
+    repeating-linear-gradient(0deg, transparent 0 24px, rgba(0, 0, 0, 0.15) 24px 25px),
+    #3a2d24;
+}
+
+/* 광장 → 술집 문 */
+.furn.door .door-frame {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: calc(var(--s) * 90px);
+  height: calc(var(--s) * 120px);
+  transform: translate(-50%, -100%);
+  background: #3b2f27;
+  border: 3px solid #4a3c32;
+  border-bottom: 0;
+  border-radius: 6px 6px 0 0;
+  display: flex;
+  justify-content: center;
+  padding-top: 8px;
+}
+.furn.door .door-frame span { font-size: 11px; letter-spacing: 0.3em; color: #b49a82; }
+.furn.door .door-frame::after {
+  content: "";
+  position: absolute;
+  right: 12%;
+  top: 55%;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #8a7460;
+}
+
+/* 바닥 매트 (문 앞 / 출구) */
+.furn.mat::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: calc(var(--s) * 110px);
+  height: calc(var(--s) * 28px);
+  transform: translate(-50%, -50%);
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px dashed rgba(255, 255, 255, 0.12);
+}
+.furn.mat span {
+  position: absolute;
+  left: 0;
+  top: 0;
+  transform: translate(-50%, -50%);
+  font-size: 11px;
+  color: #9a8a7c;
+  white-space: nowrap;
+}
+
+/* 공간 전환 페이드 */
+.fade {
+  position: absolute;
+  inset: 0;
+  background: #000;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 250ms ease;
+  z-index: 3000;
+}
+.fade.on { opacity: 1; }
+
+/* 캐릭터도 덜 번쩍이게 */
+.room .avatar { box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35); filter: saturate(0.75); }
 
 /* 가구 공통: 발밑 좌표 기준, --s 로 깊이 스케일 */
 .furn {
@@ -598,7 +662,7 @@ body.stealth .player.disguised .avatar { background: transparent !important; }
   right: 0;
   top: 0;
   height: var(--topH);
-  background: linear-gradient(#6b4129, #85543a);
+  background: #5a4334;
   clip-path: polygon(var(--inL) 0, calc(100% - var(--inR)) 0, 100% 100%, 0 100%);
 }
 .counter-front {
@@ -607,20 +671,8 @@ body.stealth .player.disguised .avatar { background: transparent !important; }
   right: 0;
   top: var(--topH);
   height: calc(var(--s) * 44px);
-  background:
-    repeating-linear-gradient(90deg, transparent 0 40px, rgba(0, 0, 0, 0.18) 40px 42px),
-    linear-gradient(#4a2b1a, #2c190f);
-  border-top: 3px solid #a06a45;
-  box-shadow: 0 8px 14px rgba(0, 0, 0, 0.6);
-}
-.counter-items {
-  position: absolute;
-  left: 18%;
-  right: 18%;
-  top: calc(var(--topH) - 20px);
-  display: flex;
-  justify-content: space-between;
-  font-size: 15px;
+  background: #3a2c22;
+  border-top: 2px solid #6b5242;
 }
 
 /* 바텐더 */
@@ -631,11 +683,7 @@ body.stealth .player.disguised .avatar { background: transparent !important; }
   top: 0;
   transform: translate(-50%, -100%);
   font-size: calc(var(--s) * 40px);
-  animation: wipe 3.5s ease-in-out infinite;
-}
-@keyframes wipe {
-  0%, 100% { rotate: -4deg; }
-  50% { rotate: 4deg; }
+  filter: saturate(0.6);
 }
 
 /* 스툴 / 의자 */
@@ -647,8 +695,8 @@ body.stealth .player.disguised .avatar { background: transparent !important; }
   height: calc(var(--s) * 12px);
   transform: translateX(-50%);
   border-radius: 50%;
-  background: radial-gradient(ellipse at 50% 35%, #b5543a, #7a2f1f);
-  box-shadow: 0 2px 0 #4c1c12;
+  background: #6a4a3a;
+  box-shadow: 0 2px 0 #3c2a20;
 }
 .furn.stool .leg {
   position: absolute;
@@ -659,7 +707,7 @@ body.stealth .player.disguised .avatar { background: transparent !important; }
   transform: translateX(-50%);
   background: #2a1810;
 }
-.furn.chair .seat { background: radial-gradient(ellipse at 50% 35%, #8a6a4a, #5a4030); box-shadow: 0 2px 0 #33241a; }
+.furn.chair .seat { background: #5a4636; }
 
 /* 테이블 */
 .t-top {
@@ -670,11 +718,8 @@ body.stealth .player.disguised .avatar { background: transparent !important; }
   height: calc(var(--s) * 46px);
   transform: translateX(-50%);
   border-radius: 50%;
-  background: radial-gradient(ellipse at 50% 40%, #8a5a3a, #5c3822 70%);
-  box-shadow: 0 calc(var(--s) * 6px) 0 #3a2214, 0 14px 18px rgba(0, 0, 0, 0.5);
-  display: grid;
-  place-items: center;
-  font-size: calc(var(--s) * 18px);
+  background: #5e4636;
+  box-shadow: 0 calc(var(--s) * 5px) 0 #3a2a20;
   z-index: 1;
 }
 .t-leg {
@@ -685,54 +730,6 @@ body.stealth .player.disguised .avatar { background: transparent !important; }
   height: calc(var(--s) * 18px);
   transform: translateX(-50%);
   background: #2a1810;
-}
-.t-base {
-  position: absolute;
-  left: 0;
-  top: calc(var(--s) * -4px);
-  width: calc(var(--s) * 50px);
-  height: calc(var(--s) * 10px);
-  transform: translateX(-50%);
-  border-radius: 50%;
-  background: #1e110a;
-}
-
-/* 조명 */
-.furn.glow { width: 0; height: 0; }
-.furn.glow::before {
-  content: "";
-  position: absolute;
-  left: 0;
-  top: 0;
-  width: calc(var(--s) * 340px);
-  height: calc(var(--s) * 160px);
-  transform: translate(-50%, -60%);
-  border-radius: 50%;
-  background: radial-gradient(ellipse, rgba(255, 190, 110, 0.28), transparent 70%);
-}
-.furn.glow.wide::before {
-  width: 80vw;
-  height: 120px;
-  background: radial-gradient(ellipse, rgba(255, 170, 90, 0.18), transparent 70%);
-}
-.furn.lamp .cord {
-  position: absolute;
-  left: 0;
-  bottom: calc(var(--s) * 108px);
-  width: 1px;
-  height: 100vh;
-  background: rgba(0, 0, 0, 0.7);
-}
-.furn.lamp .shade {
-  position: absolute;
-  left: 0;
-  top: calc(var(--s) * -92px);
-  width: calc(var(--s) * 34px);
-  height: calc(var(--s) * 16px);
-  transform: translate(-50%, -100%);
-  border-radius: 50% 50% 6px 6px / 90% 90% 6px 6px;
-  background: linear-gradient(#3a2a20, #1c140f);
-  box-shadow: 0 6px 18px 4px rgba(255, 190, 110, 0.35);
 }
 
 /* 이펙트는 항상 가구/캐릭터 위 */
@@ -839,9 +836,8 @@ body.stealth .room { background: #121212; border-color: #1b1b1b; }
 body.stealth .wall,
 body.stealth .floor,
 body.stealth .furn { filter: grayscale(1) brightness(0.3); }
-body.stealth .neon { animation: none; text-shadow: none; color: #555; }
-body.stealth .furn.glow { display: none; }
-body.stealth .furn.lamp .shade { box-shadow: none; }
+body.stealth .room[data-scene="bar"] { background: #121212; }
+body.stealth .sign { color: #333; }
 body.stealth .held,
 body.stealth .avatar::before,
 body.stealth .avatar::after { filter: grayscale(1) brightness(0.5); }
